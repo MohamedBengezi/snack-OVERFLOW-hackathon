@@ -1,0 +1,222 @@
+<html>
+    <head>
+        <title>Chat ID: {{ room }}</title>
+        <!-- <link rel="stylesheet" href="templates/css/styles.css" > -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+        <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+        <script type="text/javascript" charset="utf-8">
+            var socket;
+            $(document).ready(function(){
+                socket = io.connect('http://' + document.domain + ':' + location.port + '/chat');
+                socket.on('connect', function() {
+                    socket.emit('joined', {});
+                });
+
+                socket.on('status', function(data) {
+                    var chat = data['chat'];
+                    // console.log(chat)
+                    chatLength = Object.keys(chat).length;
+                    for (var i = 0; i < chatLength; i++) {
+                        var tones = chat[i]['tones']
+                        var score = ""
+                        // console.log(tones)
+                        if (typeof tones !== 'undefined' && tones.length > 0){
+                            // console.log("FOUND TONES!", chat[i]['msg'])
+                            var l = tones.length;
+                            // var b = Math.floor(tones[l-1]['score']*20);
+                            // score = "Overall Tone: "+tones[l-1]['tone_name'] +" | Score : "+"["+'-'.repeat(b)+' '.repeat(20-b)+"]";
+                            score = "Overall Tone: "+tones[l-1]['tone_name'].padEnd(10, " ") +" | Score : " + tones[l-1]['score'];
+                        }
+                        // console.log("Score: ", score, chat[i]['msg']);
+                        insertChat(chat[i]['usr'], chat[i]['msg'], score);
+                    }                    
+                    // $('#chat').val($('#chat').val() + '<' + data.msg + '>\n');
+                    // $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                });
+                socket.on('message', function(data) {
+                    let a = data.msg.split(":")
+                    var user = data.usr;
+                    var msg = data.msg;
+                    // console.log(a);
+                    insertChat(user, msg, data.score);
+                    // $('#chat').val($('#chat').val() + data.msg + '\n');
+                    // $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                });
+                $('#text').keypress(function(e) {
+                    var code = e.keyCode || e.which;
+                    if (code == 13) {
+                        text = $('#text').val();
+                        $('#text').val('');
+                        socket.emit('text', {msg: text});
+                    }
+                });
+                $(document).on("click",".chatMessage",function(event) {
+                    highlightTone($(this).find("p")[0]);
+                });                
+                $('body > div > div > div:nth-child(2) > span').click(function(){
+                    console.log("Ha!")
+                    highlightTone($('#text')[0]);
+                });
+                function highlightTone(text_object) {
+                    $.post('http://' + document.domain + ':' + location.port + '/tone', { text:text_object.innerText, sentence:1 } ,function(data){
+                        // console.log(data);
+                        var tones_scores = [];
+                        if (data.sentences_tone) {
+                            for (var i = 0; i < data.sentences_tone.length; i++) {
+                                var text = data.sentences_tone[i].text;
+                                var index = text_object.innerHTML.indexOf(text);
+                                if (index >= 0) { 
+                                    var curr_tone = "";
+                                    var highest_tone = 0;
+                                    for (var j = 0; j < data.sentences_tone[i].tones.length; j++) {
+                                        var b = Math.floor(data.sentences_tone[i].tones[j]["score"]*20);
+                                        var string_score = "Sentence #"+(i+1)+" Tone: "+data.sentences_tone[i].tones[j]['tone_name'].padEnd(10, " ")+"\t:\t"+"["+'-'.repeat(b).padEnd(20, " ")+"]";
+                                        console.log(string_score);
+                                        tones_scores.push(string_score);
+                                        if (data.sentences_tone[i].tones[j]["score"] > highest_tone) {
+                                            curr_tone = data.sentences_tone[i].tones[j]["tone_id"];
+                                            highest_tone = data.sentences_tone[i].tones[j]["score"];
+                                        }
+                                    }
+
+                                    var colour = "";
+
+                                    switch (curr_tone) {
+                                        case "anger":
+                                            colour = "#F05050";
+                                            break;
+                                        case "fear":
+                                            colour = "#ABB2B9";
+                                            break;
+                                        case "joy":
+                                            colour = "#F39C12";
+                                            break;
+                                        case "sadness":
+                                            colour = "#2874A6";
+                                            break;
+                                        case "analytical":
+                                            colour = "#F4D03F";
+                                            break;
+                                        case "confident":
+                                            colour = "#239B56";
+                                            break;
+                                        case "tentative":
+                                            colour = "#6C3483";
+                                            break;
+                                    }
+   
+                                    if (colour !== "") {
+                                        var new_text = text_object.innerHTML.substring(0,index) + "<mark style=\"background-color:" + colour + ";\">" 
+                                                           + text_object.innerHTML.substring(index,index+text.length) 
+                                                           + "</mark>" + text_object.innerHTML.substring(index + text.length);
+                                        $(text_object).html(new_text);                                        
+                                    }
+                                }
+                            }
+                            console.log(tones_scores);
+                            $(text_object).attr('title', text_object.title +"\n"+ tones_scores.join("\n"));
+                        } else if (data.document_tone) {
+                            var curr_tone = "";
+                            var highest_tone = 0;
+
+                            for (var i = 0; i < data.document_tone.tones.length; i++) {
+                                if (data.document_tone.tones[i]["score"] > highest_tone) {
+                                    curr_tone = data.document_tone.tones[i]["tone_id"];
+                                    highest_tone = data.document_tone.tones[i]["score"];
+                                }
+                            }
+
+                            var colour = "";
+
+                            switch (curr_tone) {
+                                case "anger":
+                                    colour = "#F05050";
+                                    break;
+                                case "fear":
+                                    colour = "#ABB2B9";
+                                    break; 
+                                case "joy":
+                                    colour = "#F39C12";
+                                    break; 
+                                case "sadness":
+                                    colour = "#2874A6";
+                                    break; 
+                                case "analytical":
+                                    colour = "#F4D03F";
+                                    break; 
+                                case "confident":
+                                    colour = "#239B56";
+                                    break; 
+                                case "tentative":
+                                    colour = "#6C3483";
+                                    break;
+                            }
+
+                            if (colour !== "") {
+                                var new_text = "<mark style=\"background-color:" + colour + ";\">" + text_object.innerHTML + "</mark>";
+                                $(text_object).html(new_text);
+                            }
+                        }
+                    });
+                }
+            });
+
+            function leave_room() {
+                socket.emit('left', {}, function() {
+                    socket.disconnect();
+
+                    // go back to the login page
+                    window.location.href = "{{ url_for('main.index') }}";
+                });
+            }
+        </script>
+    </head>
+    <body style="background-color: #EEEDDC">
+        <h1 class="text-center display-1">Clyent : {{ room }}</h1>
+        <div class="col-sm-4 col-sm-offset-4 frame">
+            <ul></ul>
+            <div style="left: 0px;" >
+                <div class="msj-rta macro">                        
+                    <div class="text text-r" style="background:whitesmoke !important">
+                        <input id="text" placeholder="Type a message"/>
+                    </div> 
+                </div>
+                <div>
+                    <!-- <span style="float: right; top: 10px;" class="glyphicon glyphicon-share-alt"></span> -->
+                    <span style="margin-left: 15px;" class="glyphicon glyphicon-refresh"></span>
+                </div>                
+            </div>
+        </div>       
+        <!-- <textarea id="chat" cols="80" rows="20"></textarea><br><br>
+        <input id="text" size="80" placeholder="Enter your message here"><br><br> -->
+
+        <br>
+        <div id="" class="col-sm-2 ">
+            <div class="panel panel-default">
+                <div class="panel-heading text-center">
+                    <h4>Legend</h4>
+                </div>
+                <div class="text-center panel-body">
+                    <p style="color:#f05050;">Anger</p>
+                    <p style="color:#ABB2B9;">Fear</p>
+                    <p style="color:#2874A6;">Sadness</p>
+                    <p style="color:#6C3483;">Tentative</p>
+                    <p style="color:#F39C12;">Joy</p>
+                    <p style="color:#F4D03F;">Analytical</p>
+                    <p style="color:#239B56;">Confident</p>
+                </div>
+                <div class="panel-footer text-center">
+                        <small>Click on any text bubble in the conversation to highlight the tones</small>
+                    </div>
+            </div>
+        </div>
+
+        <div id="" class="col-sm-5">
+                <a href="#" onclick="leave_room();">Leave this room</a>
+        </div>
+    </body>
+</html>

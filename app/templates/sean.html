@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Table V02</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.css">
+<!--===============================================================================================-->
+	<!-- <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css"> -->
+<!--===============================================================================================-->
+	<!-- <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css"> -->
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/util.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+<!--===============================================================================================-->
+</head>
+<body style="background-color: #EEEDDC">
+	
+	<div class="limiter">
+		<div class="container-table100">
+			<div class="wrap-table100">
+					<div class="table">
+
+						<div class="row header">
+							<div class="cell">
+								Customer
+							</div>
+							<div class="cell">
+								Status
+							</div>
+							<div class="cell">
+								Customer satisfaction
+							</div>
+							<div class="cell">
+								Date
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="cell" data-title="Full Name">
+								<a>Royal Bank</a>
+							</div>
+							<div class="cell" data-title="Age">
+								Working
+							</div>
+							<div class="cell" data-title="Job Title">
+								<font color="red">89%</font>
+							</div>
+							<div class="cell" data-title="Location">
+								07/12/19
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="cell" data-title="Full Name">
+								<a href="https://www.w3schools.com/html/">Hydro One</a>
+							</div>
+							<div class="cell" data-title="Age">
+								Working
+							</div>
+							<div class="cell" data-title="Job Title">
+								70%
+							</div>
+							<div class="cell" data-title="Location">
+                                07/07/19
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="cell" data-title="Full Name">
+								<a href="pic.html">Goldman Sachs</a>
+							</div>
+							<div class="cell" data-title="Age">
+								Closed
+							</div>
+							<div class="cell" data-title="Job Title">
+								<font color="red">33%</font>
+							</div>
+							<div class="cell" data-title="Location">
+								07/04/19
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="cell" data-title="Full Name">
+								<a href="https://www.w3schools.com/html/">VISA</a>
+							</div>
+							<div class="cell" data-title="Age">
+								Closed
+							</div>
+							<div class="cell" data-title="Job Title">
+								<font color="red">66%</font>
+							</div>
+							<div class="cell" data-title="Location">
+								07/02/19
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="cell" data-title="Full Name">
+								<a href="https://www.w3schools.com/html/">BMO</a>
+							</div>
+							<div class="cell" data-title="Age">
+								Closed
+							</div>
+							<div class="cell" data-title="Job Title">
+								80%
+							</div>
+							<div class="cell" data-title="Location">
+								07/01/19
+							</div>
+						</div>
+
+
+
+					</div>
+			</div>
+		</div>
+	</div>
+
+
+	
+<!--===============================================================================================-->	
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<!--===============================================================================================-->
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/popper.min.js"></script> -->
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+	<script type="text/javascript">
+		$(function() {
+				$(".cell > a").on("click",function(e) {
+				//   e.preventDefault(); // cancel the link itself
+				//   console.log(this.text);
+				  $.post('http://' + document.domain + ':' + location.port + '/join', { name:'Support', room:this.text+"_"+document.location.pathname.substr(1) } ,function(data){		
+						// console.log("in here");
+						location.href='http://' + document.domain + ':' + location.port + '/chat';
+						});
+				});
+			  });
+	</script>
+</body>
+</html>

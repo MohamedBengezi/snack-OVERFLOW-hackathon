@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <title>Clyent</title>
+        <link href="https://fonts.googleapis.com/css?family=Limelight&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+        <script type="text/javascript">
+            $(document).on("click","#bigPictureBtn",function(event) {
+                console.log("in here");
+                location.href='http://' + document.domain + ':' + location.port + '/big-picture';
+            });
+        </script>
+
+    </head>
+    <body style="background-color: #EEEDDC">
+        <h1 class="text-center" style="font-family : 'Limelight', cursive; font-size: 50px; color: #BFBCAE">Clyent Alpha</h1>
+        <div class="justify-content-center">
+            <form class="form text-center" method="POST" role="form">
+                {{ form.hidden_tag() }}
+                <br>
+                {{ form.name.label }}: {{ form.name() }} {% for error in form.name.errors %}{{ error }}{% endfor %}<br>
+                {{ form.room.label }}: {{ form.room() }} {% for error in form.room.errors %}{{ error }}{% endfor %}<br>
+                <br>
+                {{ form.submit() }}
+            </form>
+            <div class="form text-center">
+                <button id="bigPictureBtn">Enter Big Picture!</button>
+            </div>
+        </div>
+    </body>
+</html>

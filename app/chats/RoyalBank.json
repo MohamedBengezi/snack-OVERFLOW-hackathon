@@ -1,0 +1,19 @@
+{
+  "chat": [
+    {
+      "usr": "Customer",
+      "msg": "Hello sir, How may I help you today?",
+      "tones": {
+        "document_tone": {
+          "tones": [
+            {
+              "score": 0.88939,
+              "tone_id": "tentative",
+              "tone_name": "Tentative"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
